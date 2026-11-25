@@ -1,78 +1,67 @@
 
-# ApacheJIT Model Evaluation
+# ApacheJIT Model Evaluation Report
 
-## Selected model
+## Dataset
 
-Gradient Boosting
+- Dataset: ApacheJIT
+- Processed rows: 44,834 (expected)
+- Input features: 12
+- Target: buggy
+- Class 0: Non-defective
+- Class 1: Defective
 
 ## Validation strategy
 
-Chronological historical holdout.
+Chronological holdout.
 
 - Training rows: 35867
 - Validation rows: 8967
-- Cutoff date: 1970-01-01 00:00:01.437825570+00:00
-- Prediction threshold: 0.5
+- Cutoff date: 2015-07-25 11:59:30+00:00
+- Official future test datasets: Not used.
 
-Only the 12 approved software metrics were used as
-model input. The date and commit ID were used for
-validation integrity, not prediction.
+The author_date field was used only to construct
+the temporal split. It was excluded from model inputs.
 
-## Validation metrics
+All preprocessing was fitted within the training partition.
 
-| Metric | Result |
-|---|---:|
-| Accuracy | 0.7475 |
-| Precision | 0.7349 |
-| Recall | 0.7862 |
-| F1-score | 0.7597 |
-| ROC-AUC | 0.8204 |
-| PR-AUC | 0.8133 |
-| Balanced Accuracy | 0.7469 |
-| Matthews Correlation | 0.4956 |
+## Model comparison
 
-## Confusion Matrix
+| model               |   accuracy |   precision |   recall |     f1 |   roc_auc |   pr_auc |   balanced_accuracy |    mcc |
+|:--------------------|-----------:|------------:|---------:|-------:|----------:|---------:|--------------------:|-------:|
+| Gradient Boosting   |     0.7475 |      0.7349 |   0.7862 | 0.7597 |    0.8204 |   0.8133 |              0.7469 | 0.4956 |
+| Random Forest       |     0.7422 |      0.7272 |   0.7873 | 0.7561 |    0.8179 |   0.8134 |              0.7415 | 0.4853 |
+| Logistic Regression |     0.7151 |      0.7564 |   0.6469 | 0.6974 |    0.7757 |   0.7766 |              0.7161 | 0.4360 |
 
-| | Predicted Non-defective | Predicted Defective |
+## Selected model
+
+**Gradient Boosting**
+
+Selection criteria:
+
+1. Highest validation F1-score.
+2. PR-AUC as the first tie-breaker.
+3. ROC-AUC as the second tie-breaker.
+
+### Selected model metrics
+
+- Precision: 0.7349
+- Recall: 0.7862
+- F1-score: 0.7597
+- ROC-AUC: 0.8204
+- PR-AUC: 0.8133
+- Balanced Accuracy: 0.7469
+- MCC: 0.4956
+
+### Confusion matrix
+
+| | Predicted 0 | Predicted 1 |
 |---|---:|---:|
-| Actual Non-defective | 3125 | 1291 |
-| Actual Defective | 973 | 3578 |
+| Actual 0 | 3125 | 1291 |
+| Actual 1 | 973 | 3578 |
 
-## SHAP Feature Importance
+## Final evaluation restriction
 
-Mean absolute SHAP values, calculated from
-a sample of the historical development dataset.
+The official ApacheJIT future test datasets must remain
+untouched until final evaluation.
 
-| Feature | Mean absolute SHAP |
-|---|---:|
-| la | 0.761154 |
-| ld | 0.196373 |
-| age | 0.169455 |
-| nuc | 0.157800 |
-| asexp | 0.086395 |
-| ns | 0.085511 |
-| ndev | 0.054876 |
-| nf | 0.051362 |
-| arexp | 0.041912 |
-| aexp | 0.015357 |
-| ent | 0.001053 |
-| nd | 0.000024 |
-
-## Generated visualizations
-
-- confusion_matrix.png
-- roc_curve.png
-- precision_recall_curve.png
-- shap_feature_importance.png
-- shap_summary.png
-
-## Important limitations
-
-These are historical validation results, not official
-future-test results.
-
-The official ApacheJIT future test datasets remain
-reserved for final evaluation.
-
-SHAP importance describes model behavior and should
-not be interpreted as proof of causation.
+Validation metrics above are not final test metrics.

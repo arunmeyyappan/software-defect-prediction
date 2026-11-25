@@ -89,11 +89,24 @@ def load_data():
         df[TARGET_COLUMN], errors="raise"
     ).astype(int)
 
-    dates = pd.to_datetime(
+    raw_dates = pd.to_numeric(
         df[DATE_COLUMN],
-        utc=True,
         errors="coerce"
     )
+
+    if raw_dates.notna().all():
+        dates = pd.to_datetime(
+            raw_dates,
+            unit="s",
+            utc=True,
+            errors="coerce"
+        )
+    else:
+        dates = pd.to_datetime(
+            df[DATE_COLUMN],
+            utc=True,
+            errors="coerce"
+        )
 
     if X.isna().any().any():
         raise ValueError(
